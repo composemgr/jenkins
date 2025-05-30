@@ -1,4 +1,4 @@
-# nginx proxy address - http://172.17.0.1:60236
+# nginx proxy address - http://172.17.0.1:59055
 
 name: jenkins
 x-logging: &default-logging
@@ -23,10 +23,10 @@ services:
       - TZ=${TZ:-America/New_York}
     ports:
       - 50000:50000
-      - 172.17.0.1:59055:8080
+      - '172.17.0.1:59055:8080'
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /var/lib/srv/$USER/docker/jenkins/jenkins/latest/rootfs/data/jenkins:/var/jenkins_home
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - '/var/lib/srv/$USER/docker/jenkins/rootfs/data/jenkins:/var/jenkins_home'
     networks:
       - jenkins
 
