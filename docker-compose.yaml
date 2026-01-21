@@ -1,0 +1,36 @@
+# nginx proxy address - http://172.17.0.1:59055
+
+name: jenkins
+x-logging: &default-logging
+  options:
+    max-size: '5m'
+    max-file: '1'
+  driver: json-file
+
+services:
+  app:
+    image: jenkins/jenkins:latest
+    container_name: jenkins-app
+    hostname: ${BASE_HOST_NAME:-$HOSTNAME}
+    restart: always
+    pull_policy: always
+    tty: true
+    stdin_open: true
+    privileged: true
+    user: root
+    logging: *default-logging
+    environment:
+      TZ: ${TZ:-America/New_York}
+    ports:
+      - 50000:50000
+      - '172.17.0.1:59055:8080'
+    volumes:
+      - './rootfs/data/jenkins:/var/jenkins_home'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    networks:
+      - jenkins
+
+networks:
+  jenkins:
+    name: jenkins
+    external: false
