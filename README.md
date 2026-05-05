@@ -45,7 +45,7 @@ See `docker-compose.yaml` for complete list of configurable options.
 
 ## 📂 Volumes
 
-- `./rootfs/data/jenkins` - Data storage
+- `./volumes/data/jenkins` - Data storage
 
 ## 🔍 Logging
 
