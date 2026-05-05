@@ -25,7 +25,7 @@ services:
       - 50000:50000
       - '172.17.0.1:59055:8080'
     volumes:
-      - './rootfs/data/jenkins:/var/jenkins_home'
+      - './volumes/data/jenkins:/var/jenkins_home'
       - '/var/run/docker.sock:/var/run/docker.sock'
     networks:
       - jenkins
