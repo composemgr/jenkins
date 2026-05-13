@@ -21,6 +21,8 @@ services:
     logging: *default-logging
     environment:
       TZ: ${TZ:-America/New_York}
+      CONTAINER_NAME: jenkins-app
+      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
     ports:
       - 50000:50000
       - '172.17.0.1:59055:8080'
@@ -29,8 +31,30 @@ services:
       - '/var/run/docker.sock:/var/run/docker.sock'
     networks:
       - jenkins
+      - proxy
+      - cloudflare
+    labels:
+      - 'traefik.enable=true'
+      - 'cloudflare.enable=true'
+      - 'traefik.docker.network=proxy'
+      - 'cloudflare.service=http://jenkins-app:8080'
+      - 'cloudflare.hostname=jenkins.${CLOUDFLARE_ZONE_NAME:-}'
+      - 'traefik.http.routers.jenkins-app.entrypoints=http'
+      - 'traefik.http.routers.jenkins-app-secure.tls=true'
+      - 'traefik.http.routers.jenkins-app.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.middlewares.jenkins-app-https-redirect.redirectscheme.scheme=https'
+      - 'traefik.http.routers.jenkins-app.middlewares=jenkins-app-https-redirect'
+      - 'traefik.http.routers.jenkins-app-secure.entrypoints=https'
+      - 'traefik.http.routers.jenkins-app-secure.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.routers.jenkins-app-secure.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.jenkins-app-secure.service=jenkins-app'
+      - 'traefik.http.services.jenkins-app.loadbalancer.server.port=8080'
 
 networks:
   jenkins:
     name: jenkins
     external: false
+  proxy:
+    external: true
+  cloudflare:
+    external: true
