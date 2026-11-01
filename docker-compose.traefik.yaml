@@ -1,0 +1,47 @@
+name: jenkins
+x-logging: &default-logging
+  options:
+    max-size: '5m'
+    max-file: '1'
+  driver: json-file
+
+services:
+  app:
+    image: jenkins/jenkins:latest
+    container_name: jenkins-app
+    domainname: ${BASE_DOMAIN_NAME:-example.com}
+    hostname: ${BASE_HOST_NAME:-$HOSTNAME}
+    restart: always
+    pull_policy: always
+    tty: true
+    stdin_open: true
+    logging: *default-logging
+    environment:
+      TZ: ${TZ:-America/New_York}
+      CONTAINER_NAME: jenkins-app
+      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
+      JAVA_OPTS: -Djenkins.install.runSetupWizard=true
+    volumes:
+      - './volumes/data/jenkins:/var/jenkins_home:z'
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=traefik'
+      - 'traefik.http.routers.app.entrypoints=http'
+      - 'traefik.http.routers.app.rule=Host(`${BASE_HOST_NAME:-$HOSTNAME}`)'
+      - 'traefik.http.routers.app.middlewares=app-https-redirect'
+      - 'traefik.http.middlewares.app-https-redirect.redirectscheme.scheme=https'
+      - 'traefik.http.routers.app-secure.entrypoints=https'
+      - 'traefik.http.routers.app-secure.rule=Host(`${BASE_HOST_NAME:-$HOSTNAME}`)'
+      - 'traefik.http.routers.app-secure.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.app-secure.service=app'
+      - 'traefik.http.services.app.loadbalancer.server.port=8080'
+    networks:
+      - jenkins
+      - traefik
+
+networks:
+  jenkins:
+    name: jenkins
+    external: false
+  traefik:
+    external: true
