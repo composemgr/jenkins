@@ -21,6 +21,8 @@ services:
       CONTAINER_NAME: jenkins-app
       HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
       JAVA_OPTS: -Djenkins.install.runSetupWizard=true
+    ports:
+      - '50000:50000'
     volumes:
       - './volumes/data/jenkins:/var/jenkins_home:z'
     labels:
